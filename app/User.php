@@ -19,7 +19,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be hidden for arrays.
+     * The attributes that should be hidden for arrays. 
      *
      * @var array
      */
@@ -27,6 +27,9 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
+    /** User images
+     * @return mixed
+     */
     public function images(){
         return $this->hasMany('App\UserImage');
     }

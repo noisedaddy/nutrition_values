@@ -70,6 +70,20 @@ class ClarifaiController extends Controller
         $json = curl_exec($ch);
         print_r($json);
         curl_close($ch);
+
+
+        require_once 'simple_html_dom.php';
+
+        $cmd = 'curl -v "https://api.clarifai.com/v1/tag/" \
+  -X POST -F "encoded_data=@./food-07.jpg" \
+  -H "Authorization: Bearer lKA2sXSIRWdzlj4QmrRV79yfIs9pnt"';
+        $response = shell_exec($cmd);
+
+        $json = json_decode($response, true);
+
+        //$html = str_get_html($response);
+        print_r($json['results'][0]['result']['tag']['classes']);
+
     }
 
 }

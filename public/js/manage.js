@@ -6,7 +6,6 @@ var Manage = {
         // On image modal show
 
         $('#modal-image', elements).on('show.bs.modal', function (e) {
-            console.log('dsazdada');
             // Clone fresh form
             var imageForm = imageFormInitial.clone(); 
             $('.modal-content', this).html(imageForm);
@@ -15,13 +14,14 @@ var Manage = {
             // On file selection
 
             $('input[type=file]', imageForm).on('change', function () {
-                console.log('inside element');
-                App.upload(imageForm, function (response) {
+
+                App.upload(imageForm, function (data) {
 
                     $('.alert', imageForm).remove();
                     $('#fileContainer', imageForm).remove();
-                    $('#cropContainer', imageForm).removeClass('hidden').children('#cropTarget').attr('src', response);
-                    $('input[name=status]', imageForm).val(true);
+                    $('#cropContainer', imageForm).removeClass('hidden').children('#cropTarget').attr('src', data.string);
+                    $('input[name=path]', imageForm).val(data.path);
+
                 });
             });
             // On submission
@@ -89,39 +89,39 @@ var Manage = {
     },
     store: function(form) {
         // Ajax submission
+        var progress = $('.progress', form);
+        var bar = $('.progress-bar', progress);
+        var percentage = $('span', bar);
+        // Set data
+        var data = $(form).serializeArray();
+
         $(form).ajaxForm({
-            data: $(form).serialize(),
+            data: data,
+            beforeSend: function () {
+                progress.removeClass('hidden');
+                var percentVal = '0%';
+                bar.width(percentVal);
+                percentage.html(percentVal);
+            },
+            uploadProgress: function (event, position, total, percentComplete) {
+                var percentVal = percentComplete + '%';
+                bar.width(percentVal);
+                percentage.html(percentVal);
+            },
             success: function (response) {
-                $('#modal-image').modal('hide');
-                location.reload();
+                alert(response);
+            },
+            complete: function (xhr) {
+                var percentVal = '0%';
+                bar.width(percentVal);
+                percentage.html(percentVal);
+                progress.addClass('hidden');
             },
             error: function (xhr, status, error) {
                 return App.errors(xhr, $('.modal-body', form));
             }
         });
-    },
-    //imageDefault: function (id, token) {
-    //    $.ajax({
-    //        url: '/manage/image/default',
-    //        type: 'POST',
-    //        data: {'id': id, '_token': token},
-    //        success: function () {
-    //            window.location.reload();
-    //        }
-    //    });
-    //    return false;
-    //},
-    //imageDelete: function (id, token) {
-    //    $.ajax({
-    //        url: '/manage/image/delete',
-    //        type: 'POST',
-    //        data: {'id': id, '_token': token},
-    //        success: function () {
-    //            window.location.reload();
-    //        }
-    //    });
-    //    return false;
-    //}
+    }
 
 }
 

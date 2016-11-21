@@ -58,7 +58,7 @@ class UploadController extends Controller
 
                 if ($file->move($destinationPath, $fileName)) {
                     UserImage::create(['user_id'=>\Auth::user()->id, 'image_name'=>$fileName,'image_size'=>$file->getClientSize(),'image_type'=>$file->getClientMimeType(),'image_path'=>$destinationPath."/".$fileName]);
-                    return (string)$image->encode('data-url');
+                    return array("string"=>(string)$image->encode('data-url'),"path"=>$destinationPath."/".$fileName);
                 }
 
             }

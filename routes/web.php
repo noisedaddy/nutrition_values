@@ -19,4 +19,5 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index');
 Route::post('upload', ['as' => 'upload', 'uses' => 'UploadController@index']);
-Route::post('manage/image', ['as' => 'manage.image', 'uses' => 'ManageController@image']);
+//Route::post('manage/image', ['as' => 'manage.image', 'uses' => 'ManageController@image']);
+Route::post('tags', ['as' => 'tags', 'uses' => 'ClarifaiController@tags']);

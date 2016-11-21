@@ -7,7 +7,7 @@ var App = {
         // Set data
         var data = $(form).serializeArray();
         data.push({name: 'width', value: $('.modal-body', form).width() });
-        console.log(JSON.stringify(data));
+
         // Ajax submission
         $(form).ajaxForm({
             url: '/upload',
@@ -42,6 +42,7 @@ var App = {
 
     },
     errors: function (xhr, container) {
+
         if (!$('.alert-danger', container).length) {
             $('<div class="alert alert-danger"></div>').prependTo(container);
         }
@@ -50,7 +51,7 @@ var App = {
             $('<p>' + xhr.statusText + '</p>').appendTo($('.alert-danger', container));
             return false;
         }
-        console.log(JSON.stringify(xhr.responseJSON));
+        console.log(JSON.stringify(xhr));
         $.each(xhr.responseJSON, function (index, value) {
             $('<p>' + value + '</p>').appendTo($('.alert-danger', container));
         });

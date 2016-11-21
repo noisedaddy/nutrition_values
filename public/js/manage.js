@@ -10,7 +10,7 @@ var Manage = {
             var imageForm = imageFormInitial.clone(); 
             $('.modal-content', this).html(imageForm);
 
-	        //$('.photoupload').bootstrapFileInput();
+	        $('.photoupload').bootstrapFileInput();
             // On file selection
 
             $('input[type=file]', imageForm).on('change', function () {
@@ -21,6 +21,8 @@ var Manage = {
                     $('#fileContainer', imageForm).remove();
                     $('#cropContainer', imageForm).removeClass('hidden').children('#cropTarget').attr('src', data.string);
                     $('input[name=path]', imageForm).val(data.path);
+                    $('button[name=add]', imageForm).removeClass('hide');
+                    $('div.div-warning', imageForm).hide();
 
                 });
             });
@@ -71,27 +73,15 @@ var Manage = {
             });
             return false;
         });
-        // Toggle request
-        //$('[data-toggle=request]', elements).on('shown.bs.popover', function(event) {
-        //    $('input[name=Request_Status]:radio', $('#' + $(this).attr('aria-describedby'))).change(function() {
-        //        $.ajax({
-        //            url: $(this).closest('form').attr('action'),
-        //            type: 'POST',
-        //            data: $(this).closest('form').serialize(),
-        //            success: function () {
-        //                window.location.reload();
-        //            }
-        //        });
-        //        return false;
-        //    });
-        //});
         
     },
     store: function(form) {
+
         // Ajax submission
         var progress = $('.progress', form);
         var bar = $('.progress-bar', progress);
-        var percentage = $('span', bar);
+        var percen = $('span', bar);
+
         // Set data
         var data = $(form).serializeArray();
 
@@ -101,26 +91,33 @@ var Manage = {
                 progress.removeClass('hidden');
                 var percentVal = '0%';
                 bar.width(percentVal);
-                percentage.html(percentVal);
+                percen.html(percentVal);
             },
             uploadProgress: function (event, position, total, percentComplete) {
                 var percentVal = percentComplete + '%';
+                console.log(percentComplete);
+                console.log(total);
+                console.log(percentVal);
                 bar.width(percentVal);
-                percentage.html(percentVal);
+                percen.html(percentVal);
+
             },
             success: function (response) {
-                alert(response);
+                var fixedResponse = response.replace(/\\'/g, "'");
+                var jsonObj = JSON.parse(fixedResponse);
+                $('div.div-warning', form).show().empty().text(jsonObj);
+
             },
             complete: function (xhr) {
                 var percentVal = '0%';
                 bar.width(percentVal);
-                percentage.html(percentVal);
+                percen.html(percentVal);
                 progress.addClass('hidden');
             },
             error: function (xhr, status, error) {
                 return App.errors(xhr, $('.modal-body', form));
             }
-        });
+        }).submit();
     }
 
 }

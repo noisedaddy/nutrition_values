@@ -38,11 +38,11 @@
                                 <span class="sr-only">0%</span>
                             </div>
                         </div>
-                        Maximum file upload size is 4096 kB.
+                        <div class="div-warning">Maximum file upload size is 2048 kB.</div>
                     </div>
 
                     <div class="modal-footer" style="text-align: left;">
-                        <button name="add" class="btn button_primary">Find Ingidients</button>
+                        <button name="add" class="btn button_primary hide">Find Food Items</button>
                         <button class="btn button_default" data-dismiss="modal" type="button">Cancel</button>
                     </div>
                 </form>

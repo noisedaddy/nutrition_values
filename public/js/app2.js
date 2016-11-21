@@ -46,15 +46,18 @@ var App = {
         if (!$('.alert-danger', container).length) {
             $('<div class="alert alert-danger"></div>').prependTo(container);
         }
+
         $('.alert-danger', container).empty();
+
         if(xhr.status == 413) {
             $('<p>' + xhr.statusText + '</p>').appendTo($('.alert-danger', container));
             return false;
         }
-        console.log(JSON.stringify(xhr));
+
         $.each(xhr.responseJSON, function (index, value) {
             $('<p>' + value + '</p>').appendTo($('.alert-danger', container));
         });
+
         return false;
     },
     messages: function (messages, container) {

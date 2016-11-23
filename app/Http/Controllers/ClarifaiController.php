@@ -11,6 +11,7 @@ class ClarifaiController extends Controller
     private $client_secret;
     private $access_token;
     private $path = null;
+    private $tags = null;
 
     public function __construct() {
 
@@ -40,7 +41,7 @@ class ClarifaiController extends Controller
         }
 
     }
-
+    //GET TAGS FOR IMAGE
     public function tags(){
 
             if (Request::method() == "POST" && Request::ajax()){
@@ -55,19 +56,128 @@ class ClarifaiController extends Controller
 
                     $response = shell_exec($cmd);
                     $json = json_decode($response, true);
-
-                    echo json_encode($json['results'][0]['result']['tag']['classes']);
-
+                    return json_encode($json['results'][0]['result']['tag']['classes']);
                 } else {
-                    echo $this->access_token['Error'];
+                    return $this->access_token['Error'];
                 }
-
-
             } else {
-                echo "Ajax Error";
+                return "Ajax Error";
             }
 
+    }
+    
+    
+    public function getTags($t){
+        
+                $this->path = $t;
+                $this->access_token = $this->getAccessToken();
+
+                if (!is_array($this->access_token)) {
+                    $cmd = 'curl -v "https://api.clarifai.com/v1/tag/" \
+  -X POST -F "encoded_data=@./'.$this->path.'" \
+  -H "Authorization: Bearer '.$this->access_token.'"';
+
+                    $response = shell_exec($cmd);
+                    $json = json_decode($response, true);
+                    return $json['results'][0]['result']['tag']['classes'];
+                } else {
+                    return $this->access_token['Error'];
+                }
 
     }
+    
+    //GET NUTRITION REPORT
+    public function getReport(){
 
+        $t = Request::input('path');
+        $tags = $this->getTags($t);
+        
+        //$this->tags = $this->tags();
+        
+        $data = array();
+        $food_report = array();
+        
+        //$search = array();
+        
+        if (is_array($tags)){
+            foreach ($tags as $tag){
+                $data[] = 'https://api.nal.usda.gov/ndb/search?q='.$tag.'&ds=Standard%20Reference&sort=r&max=1&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY';
+            }
+        }
+        
+        $search = $this->multiRequest($data, array(), "search");
+        
+        foreach ($search as $s){
+            $food_report[] = 'http://api.nal.usda.gov/ndb/reports/?ndbno='.$s.'&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY';
+        }
+        
+        $search_report = $this->multiRequest($food_report, array(), "food_report");
+        
+        echo json_encode($search_report);
+                
+    }
+
+    //SEND MULTI REQUEST
+    public function multiRequest($data, $options = array(), $report = 'food_report') {
+
+        // array of curl handles
+        $curly = array();
+        // data to be returned
+        $result = array();
+
+        // multi handle
+        $mh = curl_multi_init();
+
+        // loop through $data and create curl handles
+        // then add them to the multi-handle
+        foreach ($data as $id => $d) {
+
+            $curly[$id] = curl_init();
+
+            $url = (is_array($d) && !empty($d['url'])) ? $d['url'] : $d;
+            curl_setopt($curly[$id], CURLOPT_URL,            $url);
+            curl_setopt($curly[$id], CURLOPT_HEADER,         0);
+            curl_setopt($curly[$id], CURLOPT_RETURNTRANSFER, 1);
+
+            // post?
+//    if (is_array($d)) {
+//      if (!empty($d['post'])) {
+//        curl_setopt($curly[$id], CURLOPT_POST,       1);
+//        curl_setopt($curly[$id], CURLOPT_POSTFIELDS, $d['post']);
+//      }
+//    }
+
+            // extra options?
+            if (!empty($options)) {
+                curl_setopt_array($curly[$id], $options);
+            }
+
+            curl_multi_add_handle($mh, $curly[$id]);
+        }
+
+        // execute the handles
+        $running = null;
+        do {
+            curl_multi_exec($mh, $running);
+        } while($running > 0);
+
+
+        // get content and remove handles
+        foreach($curly as $id => $c) {
+//    $result[$id] = curl_multi_getcontent($c);
+            $json = json_decode(curl_multi_getcontent($c), true);
+
+            if ($report == 'search')
+                $result[$id] = $json['list']['item'][0]['ndbno'];
+            else
+                $result[$id] = $json['report']['food']['nutrients'];
+
+            curl_multi_remove_handle($mh, $c);
+        }
+
+        // all done
+        curl_multi_close($mh);
+
+        return $result;
+    }
 }

@@ -22,14 +22,37 @@ var Manage = {
                     $('#cropContainer', imageForm).removeClass('hidden').children('#cropTarget').attr('src', data.string);
                     $('input[name=path]', imageForm).val(data.path);
                     $('button[name=add]', imageForm).removeClass('hide');
+                    $('button[name=add-report]', imageForm).removeClass('hide');
                     $('div.div-warning', imageForm).hide();
 
                 });
             });
             // On submission
             $('button[name=add]', imageForm).on('click', function () {
-                Manage.store(imageForm);
+                Manage.store(imageForm, function(data) {
+
+                    var fixedResponse = data.replace(/\\'/g, "'");
+                    var jsonObj = JSON.parse(fixedResponse);
+                    $('div.div-warning', imageForm).show().empty().text(jsonObj);
+
+                });
             });
+            //Generate report
+            $('button[name=add-report]', imageForm).on('click', function () {
+                App.getReport(imageForm, function (data) {
+
+                    alert(data);
+
+                    //$('.alert', imageForm).remove();
+                    //$('#fileContainer', imageForm).remove();
+                    //$('#cropContainer', imageForm).empty();
+                    //$('input[name=path]', imageForm).val(data.path);
+                    //$('button[name=add]', imageForm).removeClass('hide');
+                    //$('div.div-warning', imageForm).hide();
+
+                });
+            });
+
         });
         // On image modal hidden
         $('#modal-image', elements).on('hidden.bs.modal', function (e) {
@@ -75,7 +98,7 @@ var Manage = {
         });
         
     },
-    store: function(form) {
+    store: function(form, callback) {
 
         // Ajax submission
         var progress = $('.progress', form);
@@ -103,9 +126,10 @@ var Manage = {
 
             },
             success: function (response) {
-                var fixedResponse = response.replace(/\\'/g, "'");
-                var jsonObj = JSON.parse(fixedResponse);
-                $('div.div-warning', form).show().empty().text(jsonObj);
+                callback(response);
+                //var fixedResponse = response.replace(/\\'/g, "'");
+                //var jsonObj = JSON.parse(fixedResponse);
+                //$('div.div-warning', form).show().empty().text(jsonObj);
 
             },
             complete: function (xhr) {

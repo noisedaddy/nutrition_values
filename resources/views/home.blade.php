@@ -44,6 +44,7 @@
                     <div class="modal-footer" style="text-align: left;">
                         <button name="add" class="btn button_primary hide">Find Food Items</button>
                         <button class="btn button_default" data-dismiss="modal" type="button">Cancel</button>
+                        <button name="add-report" class="btn button_primary hide">Report</button>
                     </div>
                 </form>
             </div>

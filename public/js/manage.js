@@ -42,14 +42,15 @@ var Manage = {
                 App.getReport(imageForm, function (data) {
 
                     alert(data);
-
-                    //$('.alert', imageForm).remove();
-                    //$('#fileContainer', imageForm).remove();
-                    //$('#cropContainer', imageForm).empty();
-                    //$('input[name=path]', imageForm).val(data.path);
-                    //$('button[name=add]', imageForm).removeClass('hide');
-                    //$('div.div-warning', imageForm).hide();
-
+                    
+                    $('.alert', imageForm).remove();
+                    $('#fileContainer', imageForm).remove();
+                    $('#cropContainer', imageForm).empty();
+                    console.log(JSON.stringify(data));
+                    var fixedResponse = data.replace(/\\'/g, "'");
+                    var jsonObj = JSON.parse(fixedResponse);
+                    $('#cropContainer', imageForm).text(jsonObj);                    
+                    $('div.div-warning', imageForm).show().empty().text(jsonObj);
                 });
             });
 

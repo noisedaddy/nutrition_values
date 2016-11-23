@@ -108,6 +108,7 @@ class ClarifaiController extends Controller
         $search = $this->multiRequest($data, array(), "search");
         
         foreach ($search as $s){
+            if ($s != 0)
             $food_report[] = 'http://api.nal.usda.gov/ndb/reports/?ndbno='.$s.'&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY';
         }
         
@@ -118,7 +119,7 @@ class ClarifaiController extends Controller
     }
 
     //SEND MULTI REQUEST
-    public function multiRequest($data, $options = array(), $report = 'food_report') {
+    public function multiRequest($data, $options = array(), $report = "search") {
 
         // array of curl handles
         $curly = array();
@@ -167,11 +168,17 @@ class ClarifaiController extends Controller
 //    $result[$id] = curl_multi_getcontent($c);
             $json = json_decode(curl_multi_getcontent($c), true);
 
-            if ($report == 'search')
-                $result[$id] = $json['list']['item'][0]['ndbno'];
-            else
+            if ($report == "search"){
+                
+                if (!isset($json['error']) && isset($json['list']))
+                    $result[$id] = $json['list']['item'][0]['ndbno'];
+                else 
+                    $result[$id] = 0;
+                
+            } else {
                 $result[$id] = $json['report']['food']['nutrients'];
-
+            }
+                
             curl_multi_remove_handle($mh, $c);
         }
 

@@ -15,7 +15,7 @@ var Manage = {
 
             $('input[type=file]', imageForm).on('change', function () {
 
-                App.upload(imageForm, function (data) {
+                App.upload(imageForm, '/upload', function (data) {
 
                     $('.alert', imageForm).remove();
                     $('#fileContainer', imageForm).remove();
@@ -38,20 +38,37 @@ var Manage = {
                 });
             });
             //Generate report
-            $('button[name=add-report]', imageForm).on('click', function () {
-                App.getReport(imageForm, function (data) {
+            $('button[name=add-report]').on('click', function () {
 
-                    alert(data);
+                App.upload(imageForm, '/getReport', function (data) {
+
+                    var fixedResponse = data.replace(/\\'/g, "'");
+                    var jsonObj = JSON.parse(fixedResponse);
+                    var htmlText = '';
+                    htmlText += "<ul style='-webkit-column-count: "+jsonObj.length+"; -moz-column-count: "+jsonObj.length+"; column-count: "+jsonObj.length+";'>";
+                    
+                                $.map(jsonObj, function(value, index) {  
+                                    
+//                                    //console.log("WWWWWWW:   INDEX:      "+index+" Value: "+value);
+                                    
+                                    $.map(value, function(val, ind){
+                                        
+                                        console.log("Index: "+ind);
+                                        htmlText += "<li>"+val.name+", "+val.value+val.unit+"</li>";
+                                        
+                                    });
+                                    
+                                }); 
+                    htmlText += "</ul>";
                     
                     $('.alert', imageForm).remove();
                     $('#fileContainer', imageForm).remove();
-                    $('#cropContainer', imageForm).empty();
-                    console.log(JSON.stringify(data));
-                    var fixedResponse = data.replace(/\\'/g, "'");
-                    var jsonObj = JSON.parse(fixedResponse);
-                    $('#cropContainer', imageForm).text(jsonObj);                    
-                    $('div.div-warning', imageForm).show().empty().text(jsonObj);
+                    $('#cropContainer', imageForm).empty();    
+                    $('#cropContainer', imageForm).css({"height":"500px","overflow":"scroll"}); 
+                    $('#cropContainer', imageForm).html(htmlText);             
+                    $('h4.modal-title').text('Nutrition Values');
                 });
+                
             });
 
         });

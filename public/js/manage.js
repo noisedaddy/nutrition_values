@@ -42,19 +42,6 @@ var Manage = {
 
                 App.upload(imageForm, '/getReport', function (data) {
 
-//                    var fixedResponse = data.replace(/\\'/g, "'");
-//                    var jsonObj = JSON.parse(fixedResponse);
-//                    var htmlText = '';
-//                    htmlText += "<ul style='-webkit-column-count: "+jsonObj.length+"; -moz-column-count: "+jsonObj.length+"; column-count: "+jsonObj.length+";'>";                    
-//                                $.map(jsonObj, function(value, index) {                                                                          
-//                                    $.map(value, function(val, ind){                                        
-//                                        console.log("Index: "+ind);
-//                                        htmlText += "<li>"+val.name+", "+val.value+val.unit+"</li>";                                        
-//                                    });                                   
-//                                }); 
-//                    htmlText += "</ul>";
-
-                    
                     var jsonObj = JSON.parse(data);
                     var htmlText = '';
                     var count = Object.keys(jsonObj).length;
@@ -66,12 +53,9 @@ var Manage = {
                     } else {
                         htmlText += "<ul style='-webkit-column-count: "+count+"; -moz-column-count: "+count+"; column-count: "+count+";'>";                    
                                     $.map(jsonObj, function(value, index) { 
-
                                         $.map(value.report.food.nutrients, function(val, ind){                                        
-                                            //console.log("Index: "+index+" Value: "+value);
                                             htmlText += "<li style='font-size: 10px;'><b>"+val.name+"</b>, "+val.value+val.unit+"</li>";                                        
                                         });
-
                                     }); 
                         htmlText += "</ul>";
                     }
@@ -156,14 +140,9 @@ var Manage = {
                 console.log(percentVal);
                 bar.width(percentVal);
                 percen.html(percentVal);
-
             },
             success: function (response) {
                 callback(response);
-                //var fixedResponse = response.replace(/\\'/g, "'");
-                //var jsonObj = JSON.parse(fixedResponse);
-                //$('div.div-warning', form).show().empty().text(jsonObj);
-
             },
             complete: function (xhr) {
                 var percentVal = '0%';

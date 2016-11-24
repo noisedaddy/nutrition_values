@@ -105,29 +105,122 @@ class ClarifaiController extends Controller
             }
         }
         
-        $search = $this->multiRequest($data, array(), "search");
+//        $search = $this->multiRequest($data, array(), "search");
+//        
+//        foreach ($search as $s){
+//            
+//            if ($s != 0) $food_report[] = 'http://api.nal.usda.gov/ndb/reports/?ndbno='.$s.'&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY';
+//            
+//        }
+//        
+//        $search_report = $this->multiRequest($food_report, array(), "food_report");
+//        
+////        $food_report = array(
+////            'http://api.nal.usda.gov/ndb/reports/?ndbno=13451&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY',
+////            'http://api.nal.usda.gov/ndb/reports/?ndbno=11531&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY',
+////            'http://api.nal.usda.gov/ndb/reports/?ndbno=18240&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY'
+////          );
+//        
+//        $search_report = $this->multiRequest($food_report, array(), "food_report");
+//        
+//        echo json_encode($search_report);
+                
+        $timeout = 10;
+        $search = $this->getResponsesFromUrlsAsynchronously($data, $timeout);
         
-        foreach ($search as $s){
-            
-            if ($s != 0) $food_report[] = 'http://api.nal.usda.gov/ndb/reports/?ndbno='.$s.'&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY';
-            
+        foreach ($search as $s){                 
+            if (isset($s['list'])) $food_report[] = 'http://api.nal.usda.gov/ndb/reports/?ndbno='.$s['list']['item'][0]['ndbno'].'&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY';                 
         }
-        
-        $search_report = $this->multiRequest($food_report, array(), "food_report");
-        
+ 
 //        $food_report = array(
 //            'http://api.nal.usda.gov/ndb/reports/?ndbno=13451&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY',
 //            'http://api.nal.usda.gov/ndb/reports/?ndbno=11531&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY',
 //            'http://api.nal.usda.gov/ndb/reports/?ndbno=18240&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY'
-//          );
+//        );
         
-        $search_report = $this->multiRequest($food_report, array(), "food_report");
+        $data = $this->getResponsesFromUrlsAsynchronously($food_report, $timeout);
+                        
+        echo json_encode($data);
         
-        echo json_encode($search_report);
-                
     }
 
-    //SEND MULTI REQUEST
+    //NON BLOCKING MULTI REQUEST
+    public function getResponsesFromUrlsAsynchronously(array $urlsArray, $timeout = 8) {
+         
+        $queue = new \cURL\RequestsQueue;
+
+        // Set default options for all requests in queue
+        $queue->getDefaultOptions()
+                ->set(CURLOPT_TIMEOUT, $timeout)
+                ->set(CURLOPT_RETURNTRANSFER, true);
+
+        // =========================================================================
+        // Define some extra variables to be used in callback
+
+        global $requestUidToUserUrlIdentifiers;
+        $requestUidToUserUrlIdentifiers = array();
+
+        global $userIdentifiersToResponses;
+        $userIdentifiersToResponses = array();
+
+        // =========================================================================
+
+        // Set function to be executed when request will be completed
+        $queue->addListener('complete', function (\cURL\Event $event) {
+
+            // Define user identifier for this url
+            global $requestUidToUserUrlIdentifiers;
+            $requestId = $event->request->getUID();
+            $userIdentifier = $requestUidToUserUrlIdentifiers[$requestId];
+
+            // =========================================================================
+
+            $response = $event->response;
+            $json = $response->getContent(); // Returns content of response
+            
+//             if ($report == "search"){
+//                 
+//                if (!isset($json['error']) && isset($json['list']))
+//                    $json = $json['list']['item'][0]['ndbno'];
+//                else 
+//                    $json = 0;
+//                
+//             } else {
+//                 
+//             }
+
+                
+            $apiResponseAsArray = json_decode($json, true);
+            //$apiResponseAsArray = $apiResponseAsArray['json'];
+
+            // =========================================================================
+            // Store this response in proper structure
+            global $userIdentifiersToResponses;
+            $userIdentifiersToResponses[$userIdentifier] = $apiResponseAsArray;
+            
+            return $apiResponseAsArray;
+        });
+
+        // =========================================================================
+
+        // Add all request to queue
+        foreach ($urlsArray as $userUrlIdentifier => $url) {
+            $request = new \cURL\Request($url);
+            $requestUidToUserUrlIdentifiers[$request->getUID()] = $userUrlIdentifier;
+            $queue->attach($request);
+        }
+
+        // =========================================================================
+
+        // Execute queue
+        $queue->send();
+
+        // =========================================================================
+
+        return $userIdentifiersToResponses;
+    }
+    
+    //SEND MULTI BLOCKING REQUEST 
     public function multiRequest($data, $options = array(), $report = "search") {
 
         // array of curl handles

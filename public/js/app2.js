@@ -25,7 +25,7 @@ var App = {
                     console.log((evt));
                     if (evt.lengthComputable) {
                         var percentComplete = evt.loaded / evt.total;
-                        var percentVal = percentComplete + '%';
+                        var percentVal = evt.loaded / 100 + '%';
                         bar.width(percentVal);
                         percentage.html(percentVal);
                         console.log(percentComplete);
@@ -38,7 +38,7 @@ var App = {
                    console.log((evt));
                    if (evt.lengthComputable) {
                         var percentComplete = evt.loaded / evt.total;
-                        var percentVal = percentComplete + '%';
+                        var percentVal = parseInt( (evt.loaded / evt.total * 100), 10) + "%"
                         bar.width(percentVal);
                         percentage.html(percentVal);
                         console.log(percentComplete);
@@ -66,6 +66,7 @@ var App = {
                 console.log(JSON.stringify(xhr));
                 console.log(JSON.stringify(status));
                 console.log(JSON.stringify(error));
+                $('div.alert').html(JSON.stringify(status));
                 return App.errors(xhr, $('.modal-body', form));
             }
         }).submit();

@@ -58,18 +58,23 @@ var Manage = {
                     var jsonObj = JSON.parse(data);
                     var htmlText = '';
                     var count = Object.keys(jsonObj).length;
+                    var check = JSON.stringify(jsonObj);
                     
-                    htmlText += "<ul style='-webkit-column-count: "+count+"; -moz-column-count: "+count+"; column-count: "+count+";'>";                    
-                                $.map(jsonObj, function(value, index) { 
-                                    
-                                    $.map(value.report.food.nutrients, function(val, ind){                                        
-                                        //console.log("Index: "+index+" Value: "+value);
-                                        htmlText += "<li style='font-size: 10px;'>"+val.name+", "+val.value+val.unit+"</li>";                                        
-                                    });
-                                    
-                                }); 
-                    htmlText += "</ul>";
+                    if(check.indexOf('error') !== -1) {
+                        alert('Error: Request limit exceeded!');
+                        htmlText = '<b>Error: Request limit exceeded!</b>';
+                    } else {
+                        htmlText += "<ul style='-webkit-column-count: "+count+"; -moz-column-count: "+count+"; column-count: "+count+";'>";                    
+                                    $.map(jsonObj, function(value, index) { 
 
+                                        $.map(value.report.food.nutrients, function(val, ind){                                        
+                                            //console.log("Index: "+index+" Value: "+value);
+                                            htmlText += "<li style='font-size: 10px;'><b>"+val.name+"</b>, "+val.value+val.unit+"</li>";                                        
+                                        });
+
+                                    }); 
+                        htmlText += "</ul>";
+                    }
                     
                     $('.alert', imageForm).remove();
                     $('#fileContainer', imageForm).remove();

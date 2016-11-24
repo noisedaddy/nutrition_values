@@ -18,6 +18,7 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index');
+Route::get('/curl',  ['as' => 'curl', 'uses' => 'ManageController@multicurl_testing']);
 Route::post('upload', ['as' => 'upload', 'uses' => 'UploadController@index']);
 Route::post('tags', ['as' => 'tags', 'uses' => 'ClarifaiController@tags']);
 Route::post('getReport', ['as' => 'getReport', 'uses' => 'ClarifaiController@getReport']);

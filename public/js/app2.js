@@ -76,10 +76,10 @@ var App = {
         if (!$('.alert-danger', container).length) {
             $('<div class="alert alert-danger"></div>').prependTo(container);
         }
-        if (status == 'error')
-        $('.alert-danger', container).html(status);
+                
+        $('.alert-danger', container).empty();
 
-        if(xhr.status == 413) {
+        if(xhr.status == 413 || xhr.status == 500) {
             $('<p>' + xhr.statusText + '</p>').appendTo($('.alert-danger', container));
             return false;
         }

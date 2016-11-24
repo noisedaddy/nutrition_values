@@ -18,6 +18,36 @@ var App = {
                 bar.width(percentVal);
                 percentage.html(percentVal);
             },
+            xhr: function() {
+                var xhr = new window.XMLHttpRequest();
+                xhr.upload.addEventListener("progress", function(evt, position, total) {
+                    console.log(evt.lengthComputable);
+                    console.log((evt));
+                    if (evt.lengthComputable) {
+                        var percentComplete = evt.loaded / evt.total;
+                        var percentVal = percentComplete + '%';
+                        bar.width(percentVal);
+                        percentage.html(percentVal);
+                        console.log(percentComplete);
+                        console.log(total);
+                    }
+               }, false);
+
+               xhr.addEventListener("progress", function(evt, position, total) {
+                   console.log(evt.lengthComputable);
+                   console.log((evt));
+                   if (evt.lengthComputable) {
+                        var percentComplete = evt.loaded / evt.total;
+                        var percentVal = percentComplete + '%';
+                        bar.width(percentVal);
+                        percentage.html(percentVal);
+                        console.log(percentComplete);
+                        console.log(total);
+                   }
+               }, false);
+
+               return xhr;
+            },
             uploadProgress: function (event, position, total, percentComplete) {
                 var percentVal = percentComplete + '%';
                 bar.width(percentVal);

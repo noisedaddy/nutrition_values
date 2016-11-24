@@ -66,19 +66,18 @@ var App = {
                 console.log(JSON.stringify(xhr));
                 console.log(JSON.stringify(status));
                 console.log(JSON.stringify(error));
-                $('div.alert').html(JSON.stringify(status));
-                return App.errors(xhr, $('.modal-body', form));
+                return App.errors(xhr, status, $('.modal-body', form));
             }
         }).submit();
 
     },
-    errors: function (xhr, container) {
+    errors: function (xhr, status, container) {
 
         if (!$('.alert-danger', container).length) {
             $('<div class="alert alert-danger"></div>').prependTo(container);
         }
-
-        $('.alert-danger', container).empty();
+        if (status == 'error')
+        $('.alert-danger', container).html(status);
 
         if(xhr.status == 413) {
             $('<p>' + xhr.statusText + '</p>').appendTo($('.alert-danger', container));

@@ -12,17 +12,16 @@ class ClarifaiController extends Controller
     private $access_token;
     private $path = null;
     private $tags = null;
+    private $timeout = 10;
 
     public function __construct() {
 
     }
 
-    public function getAccessToken(){
+    public static function getAccessToken(){
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://api.clarifai.com/v1/token/");
-        //curl_setopt($ch, CURLOPT_HEADER, true);
-        //curl_setopt($ch, CURLOPT_HTTPHEADER, array("Accept: application/xml", "Authorization: removed_dev_key:removed_api_key"));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, "client_id=KX8bEdjfkaZ2XJzAxbIBFN5e2EBBT-syAa-PQNCA&client_secret=K4WCmwxkb1nz31EgI9tbMDOnSu1mrNjbPj0qoI22&grant_type=client_credentials");
@@ -47,7 +46,7 @@ class ClarifaiController extends Controller
             if (Request::method() == "POST" && Request::ajax()){
 
                 $this->path = Request::input('path');
-                $this->access_token = $this->getAccessToken();
+                $this->access_token = self::getAccessToken();
 
                 if (!is_array($this->access_token)) {
                     $cmd = 'curl -v "https://api.clarifai.com/v1/tag/" \
@@ -70,7 +69,7 @@ class ClarifaiController extends Controller
     public function getTags($t){
         
                 $this->path = $t;
-                $this->access_token = $this->getAccessToken();
+                $this->access_token = self::getAccessToken();
 
                 if (!is_array($this->access_token)) {
                     $cmd = 'curl -v "https://api.clarifai.com/v1/tag/" \
@@ -125,8 +124,8 @@ class ClarifaiController extends Controller
 //        
 //        echo json_encode($search_report);
                 
-        $timeout = 10;
-        $search = $this->getResponsesFromUrlsAsynchronously($data, $timeout);
+        
+        $search = $this->getResponsesFromUrlsAsynchronously($data, $this->timeout);
         
         foreach ($search as $s){                 
             if (isset($s['list'])) $food_report[] = 'http://api.nal.usda.gov/ndb/reports/?ndbno='.$s['list']['item'][0]['ndbno'].'&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY';                 
@@ -138,7 +137,7 @@ class ClarifaiController extends Controller
 //            'http://api.nal.usda.gov/ndb/reports/?ndbno=18240&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY'
 //        );
         
-        $data = $this->getResponsesFromUrlsAsynchronously($food_report, $timeout);
+        $data = $this->getResponsesFromUrlsAsynchronously($food_report, $this->timeout);
                         
         echo json_encode($data);
         

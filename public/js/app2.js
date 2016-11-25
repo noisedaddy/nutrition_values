@@ -21,28 +21,19 @@ var App = {
             xhr: function() {
                 var xhr = new window.XMLHttpRequest();
                 xhr.upload.addEventListener("progress", function(evt, position, total) {
-                    console.log(evt.lengthComputable);
-                    console.log((evt));
                     if (evt.lengthComputable) {
                         var percentComplete = evt.loaded / evt.total;
                         var percentVal = evt.loaded / 100 + '%';
                         bar.width(percentVal);
                         percentage.html(percentVal);
-                        console.log(percentComplete);
-                        console.log(total);
                     }
                }, false);
-
                xhr.addEventListener("progress", function(evt, position, total) {
-                   console.log(evt.lengthComputable);
-                   console.log((evt));
                    if (evt.lengthComputable) {
                         var percentComplete = evt.loaded / evt.total;
                         var percentVal = parseInt( (evt.loaded / evt.total * 100), 10) + "%"
                         bar.width(percentVal);
                         percentage.html(percentVal);
-                        console.log(percentComplete);
-                        console.log(total);
                    }
                }, false);
 

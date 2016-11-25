@@ -3,28 +3,34 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests;
-use Request;
+use App\Http\Requests\TagsRequest;
 
 class ClarifaiController extends Controller
 {
-    private $client;
-    private $client_secret;
     private $access_token;
     private $path = null;
     private $tags = null;
     private $timeout = 10;
-
+    const CLARIFAI_BASEURL = "https://api.clarifai.com/v1/token/";
+    const CLARIFAI_TOKEN = "client_id=KX8bEdjfkaZ2XJzAxbIBFN5e2EBBT-syAa-PQNCA&client_secret=K4WCmwxkb1nz31EgI9tbMDOnSu1mrNjbPj0qoI22&grant_type=client_credentials";
+    const USDA_FOOD_BASEURL = "https://api.nal.usda.gov/ndb/";
+    const USDA_FOOD_TOKEN = "api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY";
+    
     public function __construct() {
 
     }
 
+    /**
+     * Get clarifai access token 
+     * @return type string
+     */
     public static function getAccessToken(){
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://api.clarifai.com/v1/token/");
+        curl_setopt($ch, CURLOPT_URL, self::CLARIFAI_BASEURL);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, "client_id=KX8bEdjfkaZ2XJzAxbIBFN5e2EBBT-syAa-PQNCA&client_secret=K4WCmwxkb1nz31EgI9tbMDOnSu1mrNjbPj0qoI22&grant_type=client_credentials");
+        curl_setopt($ch, CURLOPT_POSTFIELDS, self::CLARIFAI_TOKEN);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
         if(!curl_exec($ch)){
@@ -32,20 +38,19 @@ class ClarifaiController extends Controller
         } else {
             $json = json_decode(curl_exec($ch), true);
             curl_close($ch);
-            if ($json['access_token']) {
-                return $json['access_token'];
-            } else {
-                return array('Error'=>'Auth Error');
-            }
+            return (isset($json['access_token'])) ? $json['access_token'] : array("Error" => __METHOD__." Line Number: ".__LINE__);
         }
 
     }
-    //GET TAGS FOR IMAGE
-    public function tags(){
+    
+    /**
+     * Find image tags from clarifai api. 
+     * @param TagsRequest $request
+     * @return type
+     */
+    public function tags(TagsRequest $request){
 
-            if (Request::method() == "POST" && Request::ajax()){
-
-                $this->path = Request::input('path');
+                $this->path = $request->input('path');
                 $this->access_token = self::getAccessToken();
 
                 if (!is_array($this->access_token)) {
@@ -55,44 +60,22 @@ class ClarifaiController extends Controller
 
                     $response = shell_exec($cmd);
                     $json = json_decode($response, true);
-                    return json_encode($json['results'][0]['result']['tag']['classes']);
+
+                    return (isset($json['results'])) ? json_encode($json['results'][0]['result']['tag']['classes']) : array("Error" => __METHOD__." Line Number: ".__LINE__);
                 } else {
-                    return $this->access_token['Error'];
-                }
-            } else {
-                return "Ajax Error";
-            }
-
-    }
-    
-    
-    public function getTags($t){
-        
-                $this->path = $t;
-                $this->access_token = self::getAccessToken();
-
-                if (!is_array($this->access_token)) {
-                    $cmd = 'curl -v "https://api.clarifai.com/v1/tag/" \
-  -X POST -F "encoded_data=@./'.$this->path.'" \
-  -H "Authorization: Bearer '.$this->access_token.'"';
-
-                    $response = shell_exec($cmd);
-                    $json = json_decode($response, true);
-                    return $json['results'][0]['result']['tag']['classes'];
-                } else {
-                    return $this->access_token['Error'];
+                    return array("Error" => __METHOD__." Line Number: ".__LINE__);
                 }
 
     }
-    
-    //GET NUTRITION REPORT
-    public function getReport(){
+   
+    /**
+     * Get nutrition report from api.nal.usda.gov
+     * @param TagsRequest $request
+     */
+    public function getReport(TagsRequest $request){
 
-        $t = Request::input('path');
-        $tags = $this->getTags($t);
-        
-        //$this->tags = $this->tags();
-        
+        $tags = json_decode($this->tags($request));
+                
         $data = array();
         $food_report = array();
         
@@ -100,7 +83,7 @@ class ClarifaiController extends Controller
         
         if (is_array($tags)){
             foreach ($tags as $tag){
-                $data[] = 'https://api.nal.usda.gov/ndb/search?q='.$tag.'&ds=Standard%20Reference&sort=r&max=1&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY';
+                $data[] = self::USDA_FOOD_BASEURL."search?q=".$tag."&ds=Standard%20Reference&sort=r&max=1&format=json&".self::USDA_FOOD_TOKEN;
             }
         }
         
@@ -128,7 +111,7 @@ class ClarifaiController extends Controller
         $search = $this->getResponsesFromUrlsAsynchronously($data, $this->timeout);
         
         foreach ($search as $s){                 
-            if (isset($s['list'])) $food_report[] = 'http://api.nal.usda.gov/ndb/reports/?ndbno='.$s['list']['item'][0]['ndbno'].'&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY';                 
+            if (isset($s['list'])) $food_report[] = self::USDA_FOOD_BASEURL."reports/?ndbno=".$s['list']['item'][0]['ndbno']."&type=b&format=json&".self::USDA_FOOD_TOKEN;                 
         }
  
 //        $food_report = array(
@@ -143,7 +126,14 @@ class ClarifaiController extends Controller
         
     }
 
-    //NON BLOCKING MULTI REQUEST
+    /**
+     * Async, non-blocking curl requests for nutrition report
+     * @global type $requestUidToUserUrlIdentifiers
+     * @global array $userIdentifiersToResponses
+     * @param array $urlsArray
+     * @param type $timeout
+     * @return array
+     */
     public function getResponsesFromUrlsAsynchronously(array $urlsArray, $timeout = 8) {
          
         $queue = new \cURL\RequestsQueue;
@@ -219,7 +209,13 @@ class ClarifaiController extends Controller
         return $userIdentifiersToResponses;
     }
     
-    //SEND MULTI BLOCKING REQUEST 
+    /**
+     * Curl blocking request. Testing purpose, replaced by getResponsesFromUrlsAsynchronously
+     * @param type $data
+     * @param type $options
+     * @param type $report
+     * @return type
+     */
     public function multiRequest($data, $options = array(), $report = "search") {
 
         // array of curl handles

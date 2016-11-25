@@ -122,7 +122,7 @@ class ClarifaiController extends Controller
         
         $data = $this->getResponsesFromUrlsAsynchronously($food_report, $this->timeout);
                         
-        echo json_encode($data);
+        return json_encode($data);
         
     }
 

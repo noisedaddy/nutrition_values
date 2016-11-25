@@ -25,17 +25,17 @@ class ManageController extends Controller
         
         //$search = array();
         
-        if (is_array($tags)){
-            foreach ($tags as $tag){
-                $data[] = 'https://api.nal.usda.gov/ndb/search?q='.$tag.'&ds=Standard%20Reference&sort=r&max=1&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY';
-            }
-        }
+//        if (is_array($tags)){
+//            foreach ($tags as $tag){
+//                $data[] = 'https://api.nal.usda.gov/ndb/search?q='.$tag.'&ds=Standard%20Reference&sort=r&max=1&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY';
+//            }
+//        }
         
-//        $urlsArray = array(
-//            'tomato'=>'http://api.nal.usda.gov/ndb/reports/?ndbno=13451&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY',
-//            'apple'=> 'http://api.nal.usda.gov/ndb/reports/?ndbno=11531&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY',
-//            'juice'=> 'http://api.nal.usda.gov/ndb/reports/?ndbno=18240&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY'
-//          );
+        $data = array(
+            'tomato'=>'http://api.nal.usda.gov/ndb/reports/?ndbno=13451&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY',
+            'apple'=> 'http://api.nal.usda.gov/ndb/reports/?ndbno=11531&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY',
+            'juice'=> 'http://api.nal.usda.gov/ndb/reports/?ndbno=18240&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY'
+          );
         
         $timeout = 10;
         $search = $this->getResponsesFromUrlsAsynchronously($data, $timeout);
@@ -46,11 +46,12 @@ class ManageController extends Controller
             
         }
         
-        $data = $this->getResponsesFromUrlsAsynchronously($food_report, $timeout);
+        print_r($food_report);
+//        $data = $this->getResponsesFromUrlsAsynchronously($food_report, $timeout);
         
-        echo "<pre>";
-        print_r($data);
-        echo "</pre>";
+//        echo "<pre>";
+//        print_r($search);
+//        echo "</pre>";
         
         $time_end = microtime(true);
         $execution_time = ($time_end - $time_start) / 60;

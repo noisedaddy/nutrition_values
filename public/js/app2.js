@@ -76,7 +76,7 @@ var App = {
         if (!$('.alert-danger', container).length) {
             $('<div class="alert alert-danger"></div>').prependTo(container);
         }
-                
+        
         $('.alert-danger', container).empty();
 
         if(xhr.status == 413 || xhr.status == 500) {

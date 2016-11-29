@@ -79,35 +79,13 @@ class ClarifaiController extends Controller
         $data = array();
         $food_report = array();
         
-        //$search = array();
         
         if (is_array($tags)){
             foreach ($tags as $tag){
                 $data[] = self::USDA_FOOD_BASEURL."search?q=".$tag."&ds=Standard%20Reference&sort=r&max=1&format=json&".self::USDA_FOOD_TOKEN;
             }
         }
-        
-//        $search = $this->multiRequest($data, array(), "search");
-//        
-//        foreach ($search as $s){
-//            
-//            if ($s != 0) $food_report[] = 'http://api.nal.usda.gov/ndb/reports/?ndbno='.$s.'&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY';
-//            
-//        }
-//        
-//        $search_report = $this->multiRequest($food_report, array(), "food_report");
-//        
-////        $food_report = array(
-////            'http://api.nal.usda.gov/ndb/reports/?ndbno=13451&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY',
-////            'http://api.nal.usda.gov/ndb/reports/?ndbno=11531&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY',
-////            'http://api.nal.usda.gov/ndb/reports/?ndbno=18240&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY'
-////          );
-//        
-//        $search_report = $this->multiRequest($food_report, array(), "food_report");
-//        
-//        echo json_encode($search_report);
-                
-        
+                               
         $search = $this->getResponsesFromUrlsAsynchronously($data, $this->timeout);
         
         foreach ($search as $s){                 

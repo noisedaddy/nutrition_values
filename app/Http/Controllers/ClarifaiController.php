@@ -113,12 +113,6 @@ class ClarifaiController extends Controller
         foreach ($search as $s){                 
             if (isset($s['list'])) $food_report[] = self::USDA_FOOD_BASEURL."reports/?ndbno=".$s['list']['item'][0]['ndbno']."&type=b&format=json&".self::USDA_FOOD_TOKEN;                 
         }
- 
-//        $food_report = array(
-//            'http://api.nal.usda.gov/ndb/reports/?ndbno=13451&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY',
-//            'http://api.nal.usda.gov/ndb/reports/?ndbno=11531&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY',
-//            'http://api.nal.usda.gov/ndb/reports/?ndbno=18240&type=b&format=json&api_key=RApFefou0FWBiBmidn83eAPPt1WRSWTTl5MqL7eY'
-//        );
         
         $data = $this->getResponsesFromUrlsAsynchronously($food_report, $this->timeout);
                         
@@ -167,16 +161,6 @@ class ClarifaiController extends Controller
             $response = $event->response;
             $json = $response->getContent(); // Returns content of response
             
-//             if ($report == "search"){
-//                 
-//                if (!isset($json['error']) && isset($json['list']))
-//                    $json = $json['list']['item'][0]['ndbno'];
-//                else 
-//                    $json = 0;
-//                
-//             } else {
-//                 
-//             }
 
                 
             $apiResponseAsArray = json_decode($json, true);

@@ -6,8 +6,10 @@ var App = {
         var percentage = $('span', bar);
         // Set data
         var data = $(form).serializeArray();
-        data.push({name: 'width', value: $('.modal-body', form).width() });
+        data.push({name: 'tag', value: this.value });
         
+        if (url == '/getTagReport') alert(JSON.stringify(data));
+        else
         // Ajax submission
         $(form).ajaxForm({
             url: url,
@@ -23,7 +25,7 @@ var App = {
                 xhr.upload.addEventListener("progress", function(evt, position, total) {
                     if (evt.lengthComputable) {
                         var percentComplete = evt.loaded / evt.total;
-                        var percentVal = evt.loaded / 100 + '%';
+                        var percentVal = parseInt( (evt.loaded / evt.total * 100), 10) + "%"
                         bar.width(percentVal);
                         percentage.html(percentVal);
                     }

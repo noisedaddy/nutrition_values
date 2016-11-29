@@ -14,9 +14,9 @@ var Manage = {
             // On file selection
 
             $('input[type=file]', imageForm).on('change', function () {
-
+                alert(imageForm);
                 App.upload(imageForm, '/upload', function (data) {
-
+                    
                     $('.alert', imageForm).remove();
                     $('#fileContainer', imageForm).remove();
                     $('#cropContainer', imageForm).removeClass('hidden').children('#cropTarget').attr('src', data.string);
@@ -24,16 +24,23 @@ var Manage = {
                     $('button[name=add]', imageForm).removeClass('hide');
                     $('button[name=add-report]', imageForm).removeClass('hide');
                     $('div.div-warning', imageForm).hide();
-
+                    
                 });
             });
             // On submission
             $('button[name=add]', imageForm).on('click', function () {
                 Manage.store(imageForm, function(data) {
 
-                    var fixedResponse = data.replace(/\\'/g, "'");
-                    var jsonObj = JSON.parse(fixedResponse);
-                    $('div.div-warning', imageForm).show().empty().text(jsonObj);
+                    var fixedResponse = data.replace(/['"]/g, '').replace(/[[\]]/g,'');
+                    var html = '';
+                    //var jsonObj = JSON.parse(fixedResponse);
+                    var array = fixedResponse.split(",");
+                    
+                    $.each(array, function(index, value){
+                        html += "<input class='btn btn-default' name='tags' type='button' value="+value+">";   
+                    });
+                    
+                    $('div.div-warning', imageForm).show().empty().html(html);
 
                 });
             });
@@ -71,6 +78,38 @@ var Manage = {
             });
 
         });
+        
+        $('button[name=tags]', imageForm).on('click', function () {
+                alert(this.value);
+                App.upload(imageForm, '/getTagReport', function (data) {
+
+                    var jsonObj = JSON.parse(data);
+                    var htmlText = '';
+                    var count = Object.keys(jsonObj).length;
+                    var check = JSON.stringify(jsonObj);
+                    
+                    if(check.indexOf('error') !== -1) {
+                        alert('Error: Request limit exceeded!');
+                        htmlText = '<b>Error: Request limit exceeded!</b>';
+                    } else {
+                        htmlText += "<ul style='-webkit-column-count: "+count+"; -moz-column-count: "+count+"; column-count: "+count+";'>";                    
+                                    $.map(jsonObj, function(value, index) { 
+                                        $.map(value.report.food.nutrients, function(val, ind){                                        
+                                            htmlText += "<li style='font-size: 10px;'><b>"+val.name+"</b>, "+val.value+val.unit+"</li>";                                        
+                                        });
+                                    }); 
+                        htmlText += "</ul>";
+                    }
+                    
+                    $('.alert', imageForm).remove();
+                    $('#fileContainer', imageForm).remove();
+                    $('#cropContainer', imageForm).empty();    
+                    $('#cropContainer', imageForm).css({"height":"500px","overflow":"scroll"}); 
+                    $('#cropContainer', imageForm).html(htmlText);             
+                    $('h4.modal-title').text('Nutrition Values');
+
+                });
+            });
         // On image modal hidden
         $('#modal-image', elements).on('hidden.bs.modal', function (e) {
             $('.modal-content', this).html(imageFormInitial);
@@ -132,6 +171,27 @@ var Manage = {
                 var percentVal = '0%';
                 bar.width(percentVal);
                 percen.html(percentVal);
+            },
+            xhr: function() {
+                var xhr = new window.XMLHttpRequest();
+                xhr.upload.addEventListener("progress", function(evt, position, total) {
+                    if (evt.lengthComputable) {
+                        var percentComplete = evt.loaded / evt.total;
+                        var percentVal = parseInt( (evt.loaded / evt.total * 100), 10) + "%"
+                        bar.width(percentVal);
+                        percen.html(percentVal);
+                    }
+               }, false);
+               xhr.addEventListener("progress", function(evt, position, total) {
+                   if (evt.lengthComputable) {
+                        var percentComplete = evt.loaded / evt.total;
+                        var percentVal = parseInt( (evt.loaded / evt.total * 100), 10) + "%"
+                        bar.width(percentVal);
+                        percen.html(percentVal);
+                   }
+               }, false);
+
+               return xhr;
             },
             uploadProgress: function (event, position, total, percentComplete) {
                 var percentVal = percentComplete + '%';

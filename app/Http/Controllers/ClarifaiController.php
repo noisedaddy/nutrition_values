@@ -74,14 +74,14 @@ class ClarifaiController extends Controller
      */
     public function getReport(TagsRequest $request){
 
-        $tags = json_decode($this->tags($request));
+        $this->tags = json_decode($this->tags($request));
                 
         $data = array();
         $food_report = array();
         
         
-        if (is_array($tags)){
-            foreach ($tags as $tag){
+        if (is_array($this->tags)){
+            foreach ($this->tags as $tag){
                 $data[] = self::USDA_FOOD_BASEURL."search?q=".$tag."&ds=Standard%20Reference&sort=r&max=1&format=json&".self::USDA_FOOD_TOKEN;
             }
         }
@@ -98,6 +98,38 @@ class ClarifaiController extends Controller
         
     }
 
+    /**
+     * Get ndbno number for given food tag
+     * @param type $tag
+     * @return type
+     */
+    public function getTagNdbno($tag=''){
+        
+        $urlsArray = array(self::USDA_FOOD_BASEURL."search?q=".$tag."&ds=Standard%20Reference&sort=r&max=1&format=json&".self::USDA_FOOD_TOKEN);        
+        $result = $this->getResponsesFromUrlsAsynchronously($urlsArray, $this->timeout);       
+        return $result;
+        
+    }
+    
+    /**
+     * Returns report for single food item
+     * @return type json
+     */
+    public function getSingleTagReport(){
+                
+        $this->tags = request()->input('tagname');
+        $result = $this->getTagNdbno($this->tags);
+        
+        if (isset($result[0]['errors'])) 
+            return json_encode(array("error"=>true, "message"=>$result[0]['errors']['error'][0]['message']));
+        else
+            $ndbno = $result[0]['list']['item'][0]['ndbno'];
+                
+        $urlsArray = array(self::USDA_FOOD_BASEURL."nutrients/?format=json&nutrients=205&nutrients=204&nutrients=208&nutrients=269&ndbno=".$ndbno."&".self::USDA_FOOD_TOKEN);        
+        $result = $this->getResponsesFromUrlsAsynchronously($urlsArray, $this->timeout); 
+        return json_encode($result);        
+    }
+        
     /**
      * Async, non-blocking curl requests for nutrition report
      * @global type $requestUidToUserUrlIdentifiers

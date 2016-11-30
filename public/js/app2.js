@@ -3,13 +3,9 @@ var App = {
         // Set progress bar
         var progress = $('.progress', form);
         var bar = $('.progress-bar', progress);
-        var percentage = $('span', bar);
-        // Set data
+        var percentage = $('span', bar);                 
         var data = $(form).serializeArray();
-        data.push({name: 'tag', value: this.value });
         
-        if (url == '/getTagReport') alert(JSON.stringify(data));
-        else
         // Ajax submission
         $(form).ajaxForm({
             url: url,

@@ -3,8 +3,8 @@ var Manage = {
         // Store forms
         var imageFormInitial = $('form', $('#modal-image', elements));
         var requestFormInitial = $('form', $('#modal-request', elements));
+        
         // On image modal show
-
         $('#modal-image', elements).on('show.bs.modal', function (e) {
             // Clone fresh form
             var imageForm = imageFormInitial.clone(); 
@@ -14,7 +14,7 @@ var Manage = {
             // On file selection
 
             $('input[type=file]', imageForm).on('change', function () {
-                alert(imageForm);
+                
                 App.upload(imageForm, '/upload', function (data) {
                     
                     $('.alert', imageForm).remove();
@@ -28,19 +28,19 @@ var Manage = {
                 });
             });
             // On submission
-            $('button[name=add]', imageForm).on('click', function () {
+            $('button[name=add]', imageForm).on('click', function () {                
                 Manage.store(imageForm, function(data) {
-
-                    var fixedResponse = data.replace(/['"]/g, '').replace(/[[\]]/g,'');
-                    var html = '';
-                    //var jsonObj = JSON.parse(fixedResponse);
-                    var array = fixedResponse.split(",");
                     
+                    //var fixedResponse = data.replace(/['"]/g, '').replace(/[[\]]/g,'');                    
+                    //var jsonObj = JSON.parse(fixedResponse);
+                    var html = '';
+                    var array = data.split(",");
+                           
                     $.each(array, function(index, value){
-                        html += "<input class='btn btn-default' name='tags' type='button' value="+value+">";   
+                        html += "<input class='btn btn-default' name='tags' type='button' style='padding: 3px; margin: 2px;' value="+value.replace(/[[\]]/g,'')+">";                            
                     });
                     
-                    $('div.div-warning', imageForm).show().empty().html(html);
+                    $('div.div-warning', imageForm).show().html(html);
 
                 });
             });
@@ -74,42 +74,48 @@ var Manage = {
                     $('#cropContainer', imageForm).html(htmlText);             
                     $('h4.modal-title').text('Nutrition Values');
                 });
-                
+                                
             });
-
+                                
         });
         
-        $('button[name=tags]', imageForm).on('click', function () {
-                alert(this.value);
-                App.upload(imageForm, '/getTagReport', function (data) {
+        //Generate single report for tags
+        $("body").delegate('input[name=tags]','click', function(){
+            
+            var imageForm = imageFormInitial.clone(); 
+            imageForm.append('<input type="hidden" name="tagname" value="'+this.value+'" />');
+            
+            App.upload(imageForm, '/getSingleTagReport', function (data) {
 
                     var jsonObj = JSON.parse(data);
                     var htmlText = '';
-                    var count = Object.keys(jsonObj).length;
                     var check = JSON.stringify(jsonObj);
-                    
-                    if(check.indexOf('error') !== -1) {
-                        alert('Error: Request limit exceeded!');
-                        htmlText = '<b>Error: Request limit exceeded!</b>';
+
+                    if(check.indexOf('error') !== -1 || jsonObj.error) {                        
+                        htmlText = '<b>'+jsonObj.message+'</b>';
                     } else {
-                        htmlText += "<ul style='-webkit-column-count: "+count+"; -moz-column-count: "+count+"; column-count: "+count+";'>";                    
+                        htmlText += "<ul>";                    
                                     $.map(jsonObj, function(value, index) { 
-                                        $.map(value.report.food.nutrients, function(val, ind){                                        
-                                            htmlText += "<li style='font-size: 10px;'><b>"+val.name+"</b>, "+val.value+val.unit+"</li>";                                        
+                                        $.map(value.report.foods, function(val, ind){                                                                                                                     
+                                            $.map(val.nutrients, function(v, i){ 
+                                                htmlText += "<li style='font-size: 15px;'><b>"+v.nutrient+"</b>, "+v.value+v.unit+"</li>";       
+                                            });
                                         });
                                     }); 
                         htmlText += "</ul>";
                     }
-                    
-                    $('.alert', imageForm).remove();
-                    $('#fileContainer', imageForm).remove();
-                    $('#cropContainer', imageForm).empty();    
-                    $('#cropContainer', imageForm).css({"height":"500px","overflow":"scroll"}); 
-                    $('#cropContainer', imageForm).html(htmlText);             
+                    $('.alert').remove();
+                    $('#fileContainer').remove();
+                    $('#cropContainer').empty();    
+                    $('#cropContainer').css({"height":"300px","overflow":"scroll"}); 
+                    $('#cropContainer').html(htmlText);             
                     $('h4.modal-title').text('Nutrition Values');
-
-                });
+                
+                   
             });
+                
+        });           
+
         // On image modal hidden
         $('#modal-image', elements).on('hidden.bs.modal', function (e) {
             $('.modal-content', this).html(imageFormInitial);

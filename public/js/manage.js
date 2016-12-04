@@ -86,20 +86,18 @@ var Manage = {
             imageForm.append('<input type="hidden" name="tagname" value="'+this.value+'" />');
             
             App.upload(imageForm, '/getSingleTagReport', function (data) {
-
+                
                     var jsonObj = JSON.parse(data);
                     var htmlText = '';
-                    var check = JSON.stringify(jsonObj);
+                    //var check = JSON.stringify(data);
 
-                    if(check.indexOf('error') !== -1 || jsonObj.error) {                        
-                        htmlText = '<b>'+jsonObj.message+'</b>';
+                    if(data.search("error") !== -1) {                     
+                        htmlText = ((jsonObj.message === undefined || jsonObj.message === null) ? '<b>Your search resulted in zero results.Change your parameters and try again</b>' : '<b>'+jsonObj.message+'</b>');                                                          
                     } else {
-                        htmlText += "<ul>";                    
+                        htmlText += "<ul style='-webkit-column-count: 3; -moz-column-count: 3; column-count: 3;'>";                    
                                     $.map(jsonObj, function(value, index) { 
-                                        $.map(value.report.foods, function(val, ind){                                                                                                                     
-                                            $.map(val.nutrients, function(v, i){ 
-                                                htmlText += "<li style='font-size: 15px;'><b>"+v.nutrient+"</b>, "+v.value+v.unit+"</li>";       
-                                            });
+                                        $.map(value.report.food.nutrients, function(val, ind){   
+                                            htmlText += "<li style='font-size: 15px;'><b>"+val.name+"</b>, "+val.value+val.unit+"</li>";
                                         });
                                     }); 
                         htmlText += "</ul>";

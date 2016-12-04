@@ -124,8 +124,9 @@ class ClarifaiController extends Controller
             return json_encode(array("error"=>true, "message"=>$result[0]['errors']['error'][0]['message']));
         else
             $ndbno = $result[0]['list']['item'][0]['ndbno'];
-                
-        $urlsArray = array(self::USDA_FOOD_BASEURL."nutrients/?format=json&nutrients=205&nutrients=204&nutrients=208&nutrients=269&ndbno=".$ndbno."&".self::USDA_FOOD_TOKEN);        
+                                
+        $urlsArray = array(self::USDA_FOOD_BASEURL."reports/?ndbno=".$ndbno."&type=b&format=json&".self::USDA_FOOD_TOKEN);        
+        
         $result = $this->getResponsesFromUrlsAsynchronously($urlsArray, $this->timeout); 
         return json_encode($result);        
     }

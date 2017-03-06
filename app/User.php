@@ -27,7 +27,7 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
-    /** User images test
+    /** User images this is another test
      * @return mixed
      */
     public function images(){

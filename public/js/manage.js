@@ -4,7 +4,7 @@ var Manage = {
         var imageFormInitial = $('form', $('#modal-image', elements));
         var requestFormInitial = $('form', $('#modal-request', elements));
         
-        // On image modal show
+        // On image modal show, new test new test new test
         $('#modal-image', elements).on('show.bs.modal', function (e) {
             // Clone fresh form
             var imageForm = imageFormInitial.clone(); 

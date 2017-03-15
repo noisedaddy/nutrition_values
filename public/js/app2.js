@@ -6,7 +6,7 @@ var App = {
         var percentage = $('span', bar);                 
         var data = $(form).serializeArray();
         
-        // Ajax submission
+        // Ajax submission, this is a test
         $(form).ajaxForm({
             url: url,
             data: data,
